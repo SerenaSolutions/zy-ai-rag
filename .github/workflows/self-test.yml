@@ -1,0 +1,21 @@
+name: self-test
+on: [push, pull_request]
+jobs:
+  rag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivalent battery (offline mode, 3 canonical cases)
+        run: |
+          set -e
+          python3 zy_ai_rag.py --question "Is every permitted use of the ZYQL gate signed with a receipt?" --rule '{"kind":"constant","value":1}' --out /tmp/t1.json
+          python3 zy_ai_rag.py --question "Is it permitted to claim quantum advantage without proof?" --rule '{"kind":"constant","value":0}' --out /tmp/t2.json
+          python3 zy_ai_rag.py --question "Is a circuit execution permitted depending on its purpose?" --rule '{"kind":"parity"}' --out /tmp/t3.json
+          python3 - <<'EOF'
+          import json
+          a=json.load(open('/tmp/t1.json'))['gate']['decision']
+          b=json.load(open('/tmp/t2.json'))['gate']['decision']
+          c=json.load(open('/tmp/t3.json'))['gate']['decision']
+          assert (a,b,c)==('1','0','REFUSED'), (a,b,c)
+          print('trivalent battery 3/3 PASS:', a, b, c)
+          EOF
