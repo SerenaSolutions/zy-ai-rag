@@ -1,0 +1,37 @@
+name: 'ZY-AI-RAG'
+description: 'RAG + trivalent AI decision in CI: BM25 retrieval, optional LLM translator, ZYQL gate verdict, sealed receipt.'
+author: 'Serena Quantum Solutions'
+branding:
+  icon: 'eye'
+  color: 'green'
+inputs:
+  question:
+    description: 'The question the pipeline must answer trivalently'
+    required: true
+  rule:
+    description: 'Offline mode: purpose rule JSON, e.g. {"kind":"constant","value":1} or {"kind":"parity"}'
+    required: false
+  corpus:
+    description: 'Corpus JSON file for BM25 retrieval (default: house corpus)'
+    required: false
+  shots:
+    description: 'Shots for the statevector-gate battery (default 4096)'
+    required: false
+    default: '4096'
+outputs:
+  decision:
+    description: '1 / 0 / REFUSED from the ZYQL quantum gate'
+    value: ${{ steps.rag.outputs.decision }}
+  seal:
+    description: 'SHA3-256 seal of the sealed receipt'
+    value: ${{ steps.rag.outputs.seal }}
+runs:
+  using: 'composite'
+  steps:
+    - id: rag
+      shell: bash
+      run: |
+        ARGS=(--question "${{ inputs.question }}" --out ${{ runner.temp }}/zy_ai_rag_receipt.json --shots ${{ inputs.shots }})
+        if [ -n "${{ inputs.rule }}" ]; then ARGS+=(--rule '${{ inputs.rule }}'); fi
+        if [ -n "${{ inputs.corpus }}" ]; then ARGS+=(--corpus "${{ inputs.corpus }}"); fi
+        python3 "${{ github.action_path }}/zy_ai_rag.py" "${ARGS[@]}"
