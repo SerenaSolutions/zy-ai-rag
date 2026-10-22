@@ -19,3 +19,11 @@ Two declared modes (the receipt always records which ran):
 The gate itself runs on the declared local statevector kernel (SIMULATION, honestly labeled) — the receipt says so.
 
 Free forever, MIT. ZEPHIRUM product line: [zqea-verify](https://github.com/marketplace/actions/z-qea-receipt-verifier), [z-anyon-lab](https://github.com/SerenaSolutions/z-anyon-lab), [zq-gate](https://github.com/SerenaSolutions/zq-gate), [zqea-seal](https://github.com/SerenaSolutions/zqea-seal).
+
+## Prova de conceito (hardware real)
+
+Porta ZYQL trivalente com recuperação BM25: consulta fraca → RECUSADO, forte → 1 — decisões lidas do hardware real (job `dbcnp4s24mrc73ck0v80`).
+
+Recibo selado: [`poc/receipt_zyai_hw.json`](poc/receipt_zyai_hw.json) — verificável com `python3 zqea_verify.py poc/receipt_zyai_hw.json --strict-pq`.
+
+Bateria completa do confronto multilíngue (OpenQASM 3, Qiskit, Cirq, PennyLane, Braket, Q#): [SerenaSolutions/quantum-poc](https://github.com/SerenaSolutions/quantum-poc).
