@@ -16,6 +16,6 @@ jobs:
           a=json.load(open('/tmp/t1.json'))['gate']['decision']
           b=json.load(open('/tmp/t2.json'))['gate']['decision']
           c=json.load(open('/tmp/t3.json'))['gate']['decision']
-          assert (a,b,c)==('1','0','REFUSED'), (a,b,c)
+          assert (str(a),str(b),str(c))==('1','0','REFUSED'), (a,b,c)
           print('trivalent battery 3/3 PASS:', a, b, c)
           EOF
