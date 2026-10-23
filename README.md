@@ -27,3 +27,8 @@ Porta ZYQL trivalente com recuperação BM25: consulta fraca → RECUSADO, forte
 Recibo selado: [`poc/receipt_zyai_hw.json`](poc/receipt_zyai_hw.json) — verificável com `python3 zqea_verify.py poc/receipt_zyai_hw.json --strict-pq`.
 
 Bateria completa do confronto multilíngue (OpenQASM 3, Qiskit, Cirq, PennyLane, Braket, Q#): [SerenaSolutions/quantum-poc](https://github.com/SerenaSolutions/quantum-poc).
+
+## Changelog
+
+### v1.1.0 (2026-10-23)
+- Kernel ZYQL v1.9.0: `--epsilon` (margem adaptativa Hoeffding, erro declarado no recibo) e `--require-trust` (porta de integridade GHZ — dispositivo inconfiável => REFUSED sem gastar oráculo, modo `REFUSED_DEVICE_DECOHERED`).

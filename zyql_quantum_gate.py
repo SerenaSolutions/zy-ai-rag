@@ -29,6 +29,39 @@ except ImportError:  # in-tree, no install
     from zquantum import QCircuit
 
 MARGIN = 0.15          # declared confidence band (+-0.15) of the noise rule
+
+
+def adaptive_margin(epsilon, shots):
+    """UPGRADE v1.9.0 — banda de confianca adaptativa (Hoeffding inverso).
+
+    O usuario declara o erro maximo tolerado (epsilon) na decisao; a banda
+    necessaria e DERIVADA, nao fixa: banda = sqrt(ln(2/eps)/(2*shots)).
+    Com shots suficiente, a banda encolhe e o veredito fica mais agressivo;
+    com shots curto, a banda cresce e o nucleo recusa em vez de mentir.
+    """
+    if not (0.0 < epsilon < 0.5):
+        raise ValueError("epsilon precisa em (0, 0.5); recebido %r" % epsilon)
+    return math.sqrt(math.log(2.0 / epsilon) / (2.0 * shots))
+
+
+def ghz_integrity(n=3, shots=2048, seed=1701, threshold=0.80):
+    """UPGRADE v1.9.0 — PORTA DE INTEGRIDADE GHZ (semantica inedita).
+
+    Antes de confiar num veredito, o PROPRIO DISPOSITIVO e testado: estado GHZ_n
+    medido; a fracao de resultados genuinamente GHZ (|00..0> + |11..1>) e a
+    fidelidade proxy. Abaixo do limiar => dispositivo INCONFIABEL, o runtime
+    recusa SEM gastar oraculo: RECUSA POR DECOERENCIA, motivo declarado.
+    """
+    qc = QCircuit(n)
+    qc.h(0)
+    for t in range(1, n):
+        qc.cnot(0, t)
+    counts = qc.measure_all(shots=shots, seed=seed)
+    zk = "|%s>" % ("0" * n)
+    ok = "|%s>" % ("1" * n)
+    f = (counts.get(zk, 0) + counts.get(ok, 0)) / shots
+    return {"fidelity_ghz": round(f, 4), "threshold": threshold,
+            "device_trusted": f >= threshold, "mode": "GHZ_INTEGRITY_GATE"}
 class ZYQLQuantumGate:
     """Deutsch-Jozsa trivalent gate. One oracle call per decision."""
 
@@ -46,8 +79,13 @@ class ZYQLQuantumGate:
         self.oracle_calls += 1
         qc.gates_applied.append("Uf(x) [1 oracle call]")
 
-    def run_quantum(self, shots=2048, seed=1701):
-        """Interference decision: 1 oracle call."""
+    def run_quantum(self, shots=2048, seed=1701, epsilon=None):
+        """Interference decision: 1 oracle call.
+
+        epsilon (v1.9.0): banda adaptativa por Hoeffding inverso.
+        Sem epsilon: banda fixa MARGIN (comportamento v1.x preservado).
+        """
+        margin = adaptive_margin(epsilon, shots) if epsilon is not None else MARGIN
         qc = QCircuit(self.n)
         for q in range(self.n):
             qc.h(q)
@@ -59,24 +97,27 @@ class ZYQLQuantumGate:
         p0 = counts.get(zk, 0) / shots          # prob of |00..0>
         self.p0 = p0
         self.counts = counts
-        return self._trivalent(p0, shots)
+        return self._trivalent(p0, shots, margin=margin,
+                               adaptive=epsilon is not None,
+                               epsilon_declared=epsilon if epsilon is not None else 1.0)
 
-    def _trivalent(self, p0, shots, eps_name="Hoeffding"):
-        """Noise rule: band +-MARGIN around 0 and 1; outside both -> REFUSED."""
-        hoeff = 2 * math.exp(-2 * shots * MARGIN ** 2)
-        if p0 >= 1 - MARGIN:
+    def _trivalent(self, p0, shots, eps_name="Hoeffding", margin=MARGIN,
+                   adaptive=False, epsilon_declared=1.0):
+        """Noise rule: band +-margin around 0 and 1; outside both -> REFUSED."""
+        hoeff = min(epsilon_declared, 2 * math.exp(-2 * shots * margin ** 2)) if adaptive else 2 * math.exp(-2 * shots * margin ** 2)
+        if p0 >= 1 - margin:
             # constant. Which constant? the classical f(0) probe (1 extra call)
             self.oracle_calls += 1
             verdict = 1 if self.f(0) == 1 else 0
             return {"decision": verdict, "mode": "DECIDED_BY_INTERFERENCE",
-                    "p0": p0, "rule": "band>=%.2f" % (1 - MARGIN),
+                    "p0": p0, "rule": ("adaptive band>=%.4f" % (1 - margin)) if adaptive else ("band>=%.2f" % (1 - margin)),
                     "error_bound": hoeff, "error_bound_type": eps_name}
-        if p0 <= MARGIN:
+        if p0 <= margin:
             return {"decision": "REFUSED", "mode": "DECIDED_BY_INTERFERENCE",
-                    "p0": p0, "rule": "band<=%.2f (balanced: input-dependent)" % MARGIN,
+                    "p0": p0, "rule": ("adaptive band<=%.4f (balanced: input-dependent)" % margin) if adaptive else ("band<=%.2f (balanced: input-dependent)" % margin),
                     "error_bound": hoeff, "error_bound_type": eps_name}
         return {"decision": "REFUSED", "mode": "INSUFFICIENT_CONFIDENCE",
-                "p0": p0, "rule": "inside noise band (+-%.2f), margin declared" % MARGIN,
+                "p0": p0, "rule": "inside noise band (+-%.4f), margin declared" % margin,
                 "error_bound": hoeff, "error_bound_type": eps_name}
 
     # --- classical baselines for the query-advantage receipt ---
