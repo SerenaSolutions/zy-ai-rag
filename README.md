@@ -1,6 +1,6 @@
 # ZY-AI-RAG
 
-![zyql](https://img.shields.io/badge/decision-trivalent%201%2F0%2FREFUSED-green) ![license](https://img.shields.io/badge/license-MIT-blue)
+![zyql](https://img.shields.io/badge/decision-trivalent%201%2F0%2FREFUSED-green) ![license](https://img.shields.io/badge/license-Apache--2.0-blue)
 
 **Trivalent AI decision for CI.** BM25 retrieval over your trusted docs, an optional LLM translator (Gemini, via `GOOGLE_API_KEY` secret), and the ZYQL quantum-gate verdict — **1 / 0 / REFUSED** — sealed with a Z-QEA SHA3-256 receipt with citations. *Nothing decides silently.*
 
