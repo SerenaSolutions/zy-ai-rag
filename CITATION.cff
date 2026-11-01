@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, cite it as below."
+title: "ZY-AI-RAG"
+abstract: "RAG plus trivalent AI decision in CI"
+version: 1.0.0
+date-released: 2026-10-31
+license: Apache-2.0
+authors:
+  - family-names: dos Anjos
+    given-names: Maria Clara
+    affiliation: SerenaSolutions
+repository-code: "https://github.com/SerenaSolutions/zy-ai-rag"
+keywords:
+  - quantum computing
+  - trivalent logic
+  - reproducibility
