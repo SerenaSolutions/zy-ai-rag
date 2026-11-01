@@ -1,0 +1,31 @@
+{
+  "title": "ZY-AI-RAG — RAG plus trivalent AI decision in CI",
+  "description": "<p>RAG plus trivalent AI decision in CI. Trivalent decision semantics: 1 (permitted), 0 (forbidden), REFUSED (unreliable), with cryptographic receipts.</p>",
+  "upload_type": "software",
+  "license": "Apache-2.0",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "dos Anjos, Maria Clara",
+      "affiliation": "SerenaSolutions"
+    },
+    {
+      "name": "SerenaSolutions",
+      "affiliation": "SerenaSolutions"
+    }
+  ],
+  "keywords": [
+    "quantum computing",
+    "trivalent logic",
+    "decision theory",
+    "reproducibility",
+    "open science"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isPartOf",
+      "identifier": "https://github.com/SerenaSolutions",
+      "scheme": "url"
+    }
+  ]
+}
