@@ -53,6 +53,9 @@ def main():
                             "device_gate": device_gate, "oracle_calls_quantum": 0}}
             rec["selo_sha3_256"] = seal(rec)
             json.dump(rec, open(a.out, "w"), ensure_ascii=True, indent=1)
+            if "GITHUB_OUTPUT" in os.environ:
+                with open(os.environ["GITHUB_OUTPUT"], "a") as fh:
+                    fh.write("decision=REFUSED\nseal=%s\n" % rec["selo_sha3_256"])
             print("ZY-AI-RAG decisao: REFUSED (dispositivo inconfiável — GHZ", 
                   device_gate["fidelity_ghz"], ") sem gastar oráculo")
             return 3
